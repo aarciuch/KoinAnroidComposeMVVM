@@ -1,34 +1,34 @@
 package psm.lab.koinanroidcomposemvvm
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import org.koin.androidx.compose.KoinAndroidContext
-import org.koin.androidx.compose.koinViewModel
 import psm.lab.koinanroidcomposemvvm.ui.theme.KoinAnroidComposeMVVMTheme
 
 class MainActivity : ComponentActivity() {
@@ -51,58 +51,54 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(modifier: Modifier = Modifier) {
-   ViewModelInject()
+fun Greeting() {
+   val navController = rememberNavController()
+
+   Scaffold (
+       bottomBar = {
+           BottomNavigationBar(navController)
+       }
+   ) { innerPadding ->
+       NavHost(
+           navController = navController,
+           startDestination = Pages.List.name,
+           modifier = Modifier.padding(innerPadding)
+       ) {
+           composable(route = Pages.List.name) { List(navController) }
+           composable(route = Pages.DB.name) { DB(navController) }
+       }
+   }
 }
-
 @Composable
-fun ViewModelInject(viewModel: UserViewModel = koinViewModel())  {
-    var a by remember { mutableStateOf("") }
-    var b by remember { mutableStateOf("") }
-    var c = remember { mutableStateOf(arrayListOf<User>()) }
+fun BottomNavigationBar(navController: NavController) {
 
-    Column (modifier = Modifier.padding(top = 24.dp, start = 8.dp, end = 8.dp)){
-        HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(top = 24.dp))
-        TextField(
-            value = a,
-            onValueChange = {
-                a = it
-                b = viewModel.sayHello(a) },
-            label = {Text("Enter name here")},
-            modifier = Modifier.fillMaxWidth()
-        )
-        Row (modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Absolute.SpaceEvenly) {
-            Button(onClick = { b = viewModel.sayHello(a) })
-            {
-                Text(text = "Szukaj")
+    BottomAppBar() {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Absolute.SpaceEvenly
+        ) {
+            Column() {
+                Text(
+                    text = "List",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                IconButton(onClick = { navController.navigate(route = Pages.List.name) })  {
+                    Icon(Icons.Filled.Home, contentDescription = "List")
+                }
             }
-            Button(onClick = {
-                viewModel.addUser(a)
-                b = ""
-                a = ""
-                c.value = viewModel.getList()  }
-            )
-            {
-                Text(text = "Dodaj")
-            }
-
-        }
-        Text(text = "${b}")
-        LazyColumn (
-            Modifier
-                .background(Color.Yellow)
-                .fillMaxWidth())
-        {
-            items(c.value) {
-                Column {
-                    Text(text = it.name,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 30.sp)
-                    HorizontalDivider(thickness = 3.dp, color = Color.Red)
+            Column () {
+                Text(
+                    text = "DB",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                IconButton(onClick = { navController.navigate(route = "${Pages.DB.name}") }) {
+                    Icon(Icons.Filled.Favorite, contentDescription = "DB")
                 }
             }
         }
     }
 }
+
 
